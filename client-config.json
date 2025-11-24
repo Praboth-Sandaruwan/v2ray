@@ -82,7 +82,7 @@
         "network": "ws",
         "security": "tls",
         "wsSettings": {
-          "path": "/danuwa",
+          "path": "/beelzebub",
           "headers": {
             "Host": "v2.praboth-sandaruwan.space"
           },

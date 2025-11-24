@@ -70,9 +70,9 @@ Before deploying this project, ensure you have:
   - Ports 80 and 443 open to the internet
   - Linux server (Ubuntu 20.04+ recommended)
 
-## Quick Start
+## Quick Start (TLS via domain)
 
-1. **Configure environment variables** in `.env` (DOMAIN, SSL_EMAIL, V2RAY_UUID, V2RAY_PATH, V2RAY_PORT). The defaults match the sample VLESS link provided above.
+1. **Configure environment variables** in `.env` (DOMAIN, SSL_EMAIL, V2RAY_UUID, V2RAY_PATH, V2RAY_PORT).
 2. **Build and start** the stack (V2Ray core, nginx reverse proxy, certbot):
    ```bash
    docker compose up -d
@@ -84,6 +84,32 @@ Before deploying this project, ensure you have:
    docker compose logs nginx
    ```
    Certbot will attempt to issue a real certificate automatically; the nginx entrypoint falls back to self-signed until issuance succeeds.
+
+## Local WS (no TLS, higher throughput)
+
+For a local WebSocket-only proxy (no nginx/certbot, no TLS):
+
+1. Copy `.env.local` and keep defaults (Host/Server = 127.0.0.1, port 11000, path `/beelzebub`).
+2. Start just V2Ray with the local override:
+   ```bash
+   docker compose -f docker-compose.local.yml --env-file .env.local up -d
+   docker compose -f docker-compose.local.yml --env-file .env.local ps
+   ```
+3. Client settings:
+   - Host: `127.0.0.1` (or your LAN IP if another device connects)
+   - Port: `11000`
+   - UUID: your `V2RAY_UUID`
+   - Security: none
+   - Network: ws
+   - Path: `/beelzebub`
+   - Host header: same as Host
+4. Test WebSocket handshake (no TLS):
+   ```bash
+   curl -v \
+     -H "Connection: Upgrade" -H "Upgrade: websocket" \
+     -H "Sec-WebSocket-Key: test" -H "Sec-WebSocket-Version: 13" \
+      http://127.0.0.1:11000/beelzebub
+   ```
 
 ## Detailed Setup Instructions
 
