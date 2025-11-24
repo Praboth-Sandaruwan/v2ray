@@ -1,0 +1,53 @@
+# Use official Nginx Alpine image
+FROM nginx:1.25-alpine
+
+# Install required packages
+RUN apk add --no-cache \
+    curl \
+    shadow \
+    gettext \
+    openssl \
+    && rm -rf /var/cache/apk/*
+
+# Ensure non-root user exists (image may already ship it)
+RUN if ! getent group nginx >/dev/null; then groupadd -r nginx; fi && \
+    if ! getent passwd nginx >/dev/null; then useradd -r -g nginx -d /var/cache/nginx -s /sbin/nologin nginx; fi
+
+# Create directories for temporary files
+RUN mkdir -p /var/cache/nginx /var/run /var/tmp && \
+    chown -R nginx:nginx /var/cache/nginx /var/run /var/tmp
+
+# Copy custom nginx configuration template and entrypoint
+COPY nginx.conf /etc/nginx/nginx.conf.template
+COPY entrypoint-nginx.sh /entrypoint-nginx.sh
+RUN chmod +x /entrypoint-nginx.sh
+
+# Create health check script
+RUN echo '#!/bin/sh' > /usr/local/bin/healthcheck.sh && \
+    echo 'curl -f http://localhost/health || exit 1' >> /usr/local/bin/healthcheck.sh && \
+    chmod +x /usr/local/bin/healthcheck.sh
+
+# Create SSL directories if they don't exist
+RUN mkdir -p /etc/ssl/certs /etc/ssl/private && \
+    chown -R root:root /etc/ssl
+
+# Create log directories
+RUN mkdir -p /var/log/nginx && \
+    chown -R nginx:nginx /var/log/nginx
+
+# Create directories for Let's Encrypt
+RUN mkdir -p /var/www/certbot && \
+    chown -R nginx:nginx /var/www/certbot
+
+# Set proper permissions
+RUN chmod 755 /var/cache/nginx /var/run /var/tmp /var/www/certbot
+
+# Expose ports
+EXPOSE 80 443
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD /usr/local/bin/healthcheck.sh
+
+# Entrypoint renders config and handles self-signed certs
+ENTRYPOINT ["/entrypoint-nginx.sh"]

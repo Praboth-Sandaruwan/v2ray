@@ -1,0 +1,152 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+*.md
+docs/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+log/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Cache directories
+.cache/
+node_modules/
+.npm/
+.yarn/
+
+# Docker files (to avoid recursive copying)
+docker-compose.yml
+Dockerfile*
+.dockerignore
+
+# SSL certificates (will be mounted as volumes)
+*.pem
+*.crt
+*.key
+certbot/
+
+# Backup files
+*.bak
+*.backup
+
+# Environment files (will be passed as arguments)
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Test files
+test/
+tests/
+__tests__/
+*.test.js
+*.spec.js
+
+# Build artifacts
+dist/
+build/
+out/
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+.nyc_output/
+
+# Dependency directories
+bower_components/
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# next.js build output
+.next
+
+# nuxt.js build output
+.nuxt
+
+# vuepress build output
+.vuepress/dist
+
+# Serverless directories
+.serverless
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
+
+# TernJS port file
+.tern-port
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# Local development files
+.local/
+local/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Configuration files that should be mounted
+# Note: config.json and nginx.conf are needed for Docker builds
+# and should not be excluded
+
+# Certbot directories
+certbot/
+letsencrypt/
+
+# Log directories
+nginx_logs/
+v2ray_logs/

@@ -1,0 +1,197 @@
+{
+  "log": {
+    "loglevel": "info",
+    "access": "/var/log/v2ray/access.log",
+    "error": "/var/log/v2ray/error.log"
+  },
+  "dns": {
+    "servers": [
+      {
+        "address": "1.1.1.1",
+        "port": 53,
+        "domains": ["geosite:geolocation-!cn"]
+      },
+      {
+        "address": "8.8.8.8",
+        "port": 53,
+        "domains": ["geosite:geolocation-!cn"]
+      },
+      {
+        "address": "1.0.0.1",
+        "port": 53
+      },
+      {
+        "address": "8.8.4.4",
+        "port": 53
+      },
+      "localhost"
+    ],
+    "queryStrategy": "UseIPv4",
+    "disableCache": false,
+    "disableFallback": false,
+    "tag": "dns"
+  },
+  "inbounds": [
+    {
+      "listen": "0.0.0.0",
+      "port": 1080,
+      "protocol": "socks",
+      "settings": {
+        "auth": "noauth",
+        "udp": true,
+        "ip": "0.0.0.0",
+        "userLevel": 0
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls",
+          "fakedns"
+        ],
+        "metadataOnly": false,
+        "routeOnly": false
+      },
+      "allocate": {
+        "strategy": "always",
+        "refresh": 5,
+        "concurrency": 3
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "v2.praboth-sandaruwan.space",
+            "port": 443,
+            "users": [
+              {
+                "id": "2e50bce3-2c41-4d46-9a25-7b4d478c855a",
+                "level": 0,
+                "email": "user@example.com",
+                "encryption": "none"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "security": "tls",
+        "wsSettings": {
+          "path": "/danuwa",
+          "headers": {
+            "Host": "v2.praboth-sandaruwan.space"
+          },
+          "maxEarlyData": 2048,
+          "useBrowserForwarding": true
+        },
+        "tlsSettings": {
+          "serverName": "v2.praboth-sandaruwan.space",
+          "allowInsecure": false,
+          "fingerprint": "chrome",
+          "alpn": ["h2", "http/1.1"],
+          "allowInsecureCiphers": true
+        },
+        "sockopt": {
+          "tcpFastOpen": true,
+          "tproxy": "redirect",
+          "tcpKeepAliveInterval": 15,
+          "tcpKeepAliveIdle": 300,
+          "tcpUserTimeout": 10000,
+          "tcpMptcp": true,
+          "tcpNoDelay": true
+        }
+      },
+      "mux": {
+        "enabled": true,
+        "concurrency": 8,
+        "xudpConcurrency": 8,
+        "xudpProxyUDP443": "reject"
+      },
+      "tag": "proxy"
+    },
+    {
+      "protocol": "freedom",
+      "settings": {},
+      "tag": "direct"
+    },
+    {
+      "protocol": "blackhole",
+      "settings": {},
+      "tag": "blocked"
+    }
+  ],
+  "routing": {
+    "rules": [
+      {
+        "type": "field",
+        "ip": [
+          "geoip:private"
+        ],
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "ip": [
+          "geoip:cn"
+        ],
+        "outboundTag": "blocked"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "geosite:category-ads-all"
+        ],
+        "outboundTag": "blocked"
+      },
+      {
+        "type": "field",
+        "network": "tcp,udp",
+        "outboundTag": "proxy"
+      }
+    ]
+  },
+  "policy": {
+    "levels": {
+      "0": {
+        "handshake": 2,
+        "connIdle": 120,
+        "uplinkOnly": 1,
+        "downlinkOnly": 2,
+        "statsUserUplink": false,
+        "statsUserDownlink": false,
+        "bufferSize": 65536
+      }
+    },
+    "system": {
+      "statsInboundUplink": false,
+      "statsInboundDownlink": false,
+      "statsOutboundUplink": false,
+      "statsOutboundDownlink": false,
+      "sockopt": {
+        "tcpFastOpen": true,
+        "tcpKeepAliveInterval": 10,
+        "tcpKeepAliveIdle": 60,
+        "tcpUserTimeout": 5000,
+        "tcpMptcp": true,
+        "tcpNoDelay": true
+      }
+    }
+  },
+  "stats": {},
+  "api": {
+    "tag": "api",
+    "services": []
+  },
+  "observatory": {
+    "subjectSelector": [],
+    "probeUrl": "http://www.gstatic.com/generate_204",
+    "probeInterval": "10s"
+  },
+  "reverse": {},
+  "transport": {}
+}

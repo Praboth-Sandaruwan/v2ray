@@ -1,0 +1,137 @@
+services:
+  v2ray:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: v2ray-core
+    restart: unless-stopped
+    ports:
+      - "${V2RAY_PORT:-10000}:${V2RAY_PORT:-10000}"
+    volumes:
+      - ./config.json:/etc/v2ray/config.json.template:ro
+      - v2ray_logs:/var/log/v2ray
+    networks:
+      - v2ray-network
+    environment:
+      - V2RAY_UUID=${V2RAY_UUID}
+      - V2RAY_UUID_FALLBACK=${V2RAY_UUID_FALLBACK}
+      - V2RAY_UUID_RANDOMIZE=${V2RAY_UUID_RANDOMIZE}
+      - V2RAY_PATH=${V2RAY_PATH}
+      - V2RAY_PORT=${V2RAY_PORT}
+      - V2RAY_SERVER=${DOMAIN}
+      - V2RAY_LOG_LEVEL=${V2RAY_LOG_LEVEL:-warning}
+      - TCP_FAST_OPEN=true
+      - NET_CORE_RMEM_MAX=134217728
+      - NET_CORE_WMEM_MAX=134217728
+      - NET_IPV4_TCP_RMEM=4096 65536 134217728
+      - NET_IPV4_TCP_WMEM=4096 65536 134217728
+      - NET_IPV4_TCP_CONGESTION_CONTROL=bbr
+      - NET_IPV4_TCP_FAST_OPEN=3
+      - NET_CORE_NETDEV_MAX_BACKLOG=5000
+    healthcheck:
+      test: ["CMD", "pgrep", "-f", "v2ray"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'
+          memory: 2G
+        reservations:
+          cpus: '2.0'
+          memory: 1G
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+      nproc:
+        soft: 32768
+        hard: 32768
+    privileged: false
+    cap_add:
+      - NET_ADMIN
+      - SYS_RESOURCE
+    cap_drop:
+      - ALL
+    read_only: false
+    tmpfs:
+      - /tmp:noexec,nosuid,size=256m
+      - /var/tmp:noexec,nosuid,size=256m
+      - /var/run:noexec,nosuid,size=32m
+    shm_size: 256m
+
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    container_name: v2ray-nginx
+    restart: unless-stopped
+    depends_on:
+      - v2ray
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - DOMAIN=${DOMAIN}
+      - V2RAY_PORT=${V2RAY_PORT}
+      - V2RAY_PATH=${V2RAY_PATH}
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf.template:ro
+      - certbot-etc:/etc/letsencrypt
+      - certbot-www:/var/www/certbot
+      - ssl-certs:/etc/ssl
+    networks:
+      - v2ray-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  certbot:
+    image: certbot/certbot:latest
+    container_name: v2ray-certbot
+    restart: unless-stopped
+    depends_on:
+      - nginx
+    entrypoint: ["/bin/sh", "/certbot-entrypoint.sh"]
+    environment:
+      - DOMAIN=${DOMAIN}
+      - SSL_EMAIL=${SSL_EMAIL}
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-www:/var/www/certbot
+      - ssl-certs:/etc/ssl
+      - ./certbot-entrypoint.sh:/certbot-entrypoint.sh:ro
+    networks:
+      - v2ray-network
+
+networks:
+  v2ray-network:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: v2ray-br0
+      com.docker.network.driver.mtu: 1500
+      com.docker.network.bridge.enable_icc: "true"
+      com.docker.network.bridge.enable_ip_masquerade: "true"
+      com.docker.network.driver.overlay.enable_broadcast: "true"
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.25.0.0/16
+          gateway: 172.25.0.1
+          ip_range: 172.25.0.0/24
+
+volumes:
+  v2ray_logs:
+    driver: local
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+      o: size=100m,uid=1000,gid=1000
+  certbot-etc:
+  certbot-www:
+  ssl-certs:
