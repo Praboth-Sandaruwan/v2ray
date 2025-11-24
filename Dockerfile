@@ -113,7 +113,7 @@ RUN echo '#!/bin/bash' > /usr/local/bin/start-v2ray.sh && \
     echo 'CONFIG_OUTPUT="/etc/v2ray/config.json"' >> /usr/local/bin/start-v2ray.sh && \
     echo 'if [ -f "$CONFIG_TEMPLATE" ]; then' >> /usr/local/bin/start-v2ray.sh && \
     echo '    log "Rendering V2Ray config from template"' >> /usr/local/bin/start-v2ray.sh && \
-    echo '    envsubst '\''$V2RAY_UUID $V2RAY_PORT $V2RAY_PATH $V2RAY_SERVER $V2RAY_LOG_LEVEL'\'' < "$CONFIG_TEMPLATE" > "$CONFIG_OUTPUT"' >> /usr/local/bin/start-v2ray.sh && \
+    echo '    envsubst '\''$V2RAY_UUID $V2RAY_PORT $V2RAY_PATH $V2RAY_SERVER $V2RAY_LOG_LEVEL $DNS_QUERY_STRATEGY $DNS_DISABLE_CACHE $V2RAY_BUFFER_SIZE'\'' < "$CONFIG_TEMPLATE" > "$CONFIG_OUTPUT"' >> /usr/local/bin/start-v2ray.sh && \
     echo '    chown v2ray:v2ray "$CONFIG_OUTPUT" 2>/dev/null || true' >> /usr/local/bin/start-v2ray.sh && \
     echo 'fi' >> /usr/local/bin/start-v2ray.sh && \
     echo '' >> /usr/local/bin/start-v2ray.sh && \

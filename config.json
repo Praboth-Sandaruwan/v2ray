@@ -12,17 +12,17 @@
       "8.8.4.4"
     ],
     "queryStrategy": "${DNS_QUERY_STRATEGY:-UseIPv4}",
-    "disableCache": ${DNS_DISABLE_CACHE:-false}
+    "disableCache": false
   },
   "inbounds": [
     {
       "listen": "0.0.0.0",
-      "port": ${V2RAY_PORT},
+      "port": 11000,
       "protocol": "vless",
       "settings": {
         "clients": [
           {
-            "id": "${V2RAY_UUID}",
+            "id": "2e50bce3-2c41-4d46-9a25-7b4d478c855a",
             "level": 0,
             "email": "user@example.com"
           }
@@ -32,9 +32,9 @@
       "streamSettings": {
         "network": "ws",
         "wsSettings": {
-            "path": "${V2RAY_PATH}",
+            "path": "/beelzebub",
           "headers": {
-            "Host": "${V2RAY_SERVER}"
+            "Host": "127.0.0.1"
           }
         },
         "security": "none",
@@ -103,7 +103,7 @@
         "downlinkOnly": 5,
         "statsUserUplink": true,
         "statsUserDownlink": true,
-        "bufferSize": ${V2RAY_BUFFER_SIZE:-65536}
+        "bufferSize": 65536
       }
     },
     "system": {

@@ -65,8 +65,8 @@
       "settings": {
         "vnext": [
           {
-            "address": "v2.praboth-sandaruwan.space",
-            "port": 443,
+            "address": "127.0.0.1",
+            "port": 11000,
             "users": [
               {
                 "id": "2e50bce3-2c41-4d46-9a25-7b4d478c855a",
@@ -80,21 +80,14 @@
       },
       "streamSettings": {
         "network": "ws",
-        "security": "tls",
+        "security": "none",
         "wsSettings": {
           "path": "/beelzebub",
           "headers": {
-            "Host": "v2.praboth-sandaruwan.space"
+            "Host": "127.0.0.1"
           },
           "maxEarlyData": 2048,
           "useBrowserForwarding": true
-        },
-        "tlsSettings": {
-          "serverName": "v2.praboth-sandaruwan.space",
-          "allowInsecure": false,
-          "fingerprint": "chrome",
-          "alpn": ["h2", "http/1.1"],
-          "allowInsecureCiphers": true
         },
         "sockopt": {
           "tcpFastOpen": true,
