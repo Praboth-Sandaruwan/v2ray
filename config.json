@@ -10,7 +10,9 @@
       "1.0.0.1",
       "8.8.8.8",
       "8.8.4.4"
-    ]
+    ],
+    "queryStrategy": "${DNS_QUERY_STRATEGY:-UseIPv4}",
+    "disableCache": ${DNS_DISABLE_CACHE:-false}
   },
   "inbounds": [
     {
@@ -37,7 +39,8 @@
         },
         "security": "none",
         "sockopt": {
-          "tcpFastOpen": true
+          "tcpFastOpen": true,
+          "tcpNoDelay": true
         }
       },
       "sniffing": {
@@ -100,7 +103,7 @@
         "downlinkOnly": 5,
         "statsUserUplink": true,
         "statsUserDownlink": true,
-        "bufferSize": 10240
+        "bufferSize": ${V2RAY_BUFFER_SIZE:-65536}
       }
     },
     "system": {

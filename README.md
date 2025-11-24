@@ -4,7 +4,10 @@ A production-ready Docker-based V2Ray server implementation with VLESS protocol,
 
 ## Overview
 
-This project provides a secure, scalable, and easy-to-deploy V2Ray server solution using Docker containers. It implements a multi-container architecture with Nginx as a reverse proxy, V2Ray core for the proxy functionality, and Certbot for automated SSL certificate management.
+This project provides a secure, scalable, and easy-to-deploy V2Ray server solution using Docker containers. It supports two modes:
+
+- **TLS mode (domain required)**: Nginx + Certbot + V2Ray, fronted on 443 with valid HTTPS.
+- **Local WS mode (no TLS)**: V2Ray only on a local port for maximum throughput/testing.
 
 ### Key Features
 
@@ -70,45 +73,58 @@ Before deploying this project, ensure you have:
   - Ports 80 and 443 open to the internet
   - Linux server (Ubuntu 20.04+ recommended)
 
-## Quick Start (TLS via domain)
+## Quick Start
 
-1. **Configure environment variables** in `.env` (DOMAIN, SSL_EMAIL, V2RAY_UUID, V2RAY_PATH, V2RAY_PORT).
-2. **Build and start** the stack (V2Ray core, nginx reverse proxy, certbot):
+### TLS mode (domain + certbot + nginx)
+1. Set `.env`:
+   - `DOMAIN=<your-domain>` (A record to your server IP)
+   - `SSL_EMAIL=<your-email>`
+   - `V2RAY_UUID`, `V2RAY_PATH`, `V2RAY_PORT`
+2. Start:
    ```bash
-   docker compose up -d
+   docker compose --profile tls up -d
    ```
-3. **Verify**:
+3. Verify:
    ```bash
    docker compose ps
    docker compose logs v2ray
-   docker compose logs nginx
+   docker compose --profile tls logs nginx
    ```
-   Certbot will attempt to issue a real certificate automatically; the nginx entrypoint falls back to self-signed until issuance succeeds.
+   Certbot issues the cert automatically; nginx falls back to self-signed until it succeeds.
+4. Client (TLS/WS):
+   - Host/SNI: `DOMAIN`
+   - Port: `443`
+   - UUID: your `V2RAY_UUID`
+   - Security: `tls`
+   - Network: `ws`
+   - Path: `V2RAY_PATH` (default `/beelzebub`)
+   - Fingerprint: `chrome` (if supported)
 
-## Local WS (no TLS, higher throughput)
-
-For a local WebSocket-only proxy (no nginx/certbot, no TLS):
-
-1. Copy `.env.local` and keep defaults (Host/Server = 127.0.0.1, port 11000, path `/beelzebub`).
-2. Start just V2Ray with the local override:
+### Local WS mode (no TLS, higher throughput)
+1. Use `.env.local` defaults (Host/Server `127.0.0.1`, Port `11000`, Path `/beelzebub`).
+2. Start V2Ray only:
    ```bash
    docker compose -f docker-compose.local.yml --env-file .env.local up -d
    docker compose -f docker-compose.local.yml --env-file .env.local ps
    ```
-3. Client settings:
-   - Host: `127.0.0.1` (or your LAN IP if another device connects)
+3. Client (WS, no TLS):
+   - Host: `127.0.0.1` (or your LAN IP)
    - Port: `11000`
    - UUID: your `V2RAY_UUID`
-   - Security: none
-   - Network: ws
+   - Security: `none`
+   - Network: `ws`
    - Path: `/beelzebub`
    - Host header: same as Host
-4. Test WebSocket handshake (no TLS):
+   - v2rayN quick add (import URL):
+     ```
+     vless://2e50bce3-2c41-4d46-9a25-7b4d478c855a@127.0.0.1:11000?encryption=none&security=none&type=ws&host=127.0.0.1&path=%2Fbeelzebub#local-ws
+     ```
+4. Test handshake:
    ```bash
    curl -v \
      -H "Connection: Upgrade" -H "Upgrade: websocket" \
      -H "Sec-WebSocket-Key: test" -H "Sec-WebSocket-Version: 13" \
-      http://127.0.0.1:11000/beelzebub
+     http://127.0.0.1:11000/beelzebub
    ```
 
 ## Detailed Setup Instructions
@@ -126,8 +142,8 @@ SSL_EMAIL=admin@your-domain.com
 
 # V2Ray Configuration
 V2RAY_UUID=your-uuid-here  # Generate with: uuidgen
-V2RAY_PATH=/your-custom-path
-V2RAY_PORT=10000
+V2RAY_PATH=/your-custom-path   # default /beelzebub
+V2RAY_PORT=10000              # TLS mode
 ```
 
 ### 2. V2Ray Configuration
@@ -221,19 +237,19 @@ For detailed security information, see [SECURITY.md](SECURITY.md).
 1. **Certificate Issues**:
    ```bash
    # Check certificate status
-   docker-compose exec certbot certbot certificates
+   docker compose --profile tls exec certbot certbot certificates
    
    # Force certificate renewal
-   docker-compose exec certbot certbot renew --force-renewal
+   docker compose --profile tls exec certbot certbot renew --force-renewal
    ```
 
 2. **Connection Issues**:
    ```bash
    # Check V2Ray logs
-   docker-compose logs v2ray
+   docker compose logs v2ray
    
    # Check Nginx logs
-   docker-compose logs nginx
+   docker compose --profile tls logs nginx
    
    # Test WebSocket connection
    curl -i -N -H "Connection: Upgrade" \
@@ -249,7 +265,7 @@ For detailed security information, see [SECURITY.md](SECURITY.md).
    docker stats
    
    # Check connection limits
-   docker-compose exec nginx nginx -T | grep limit
+   docker compose --profile tls exec nginx nginx -T | grep limit
    ```
 
 ### Health Checks
