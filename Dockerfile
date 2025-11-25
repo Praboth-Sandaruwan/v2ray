@@ -102,6 +102,9 @@ RUN echo '#!/bin/bash' > /usr/local/bin/start-v2ray.sh && \
     echo 'export V2RAY_PATH="${V2RAY_PATH:-/danuwa}"' >> /usr/local/bin/start-v2ray.sh && \
     echo 'export V2RAY_SERVER="${V2RAY_SERVER:-127.0.0.1}"' >> /usr/local/bin/start-v2ray.sh && \
     echo 'export V2RAY_LOG_LEVEL="${V2RAY_LOG_LEVEL:-warning}"' >> /usr/local/bin/start-v2ray.sh && \
+    echo 'export DNS_QUERY_STRATEGY="${DNS_QUERY_STRATEGY:-UseIPv4}"' >> /usr/local/bin/start-v2ray.sh && \
+    echo 'export DNS_DISABLE_CACHE="${DNS_DISABLE_CACHE:-false}"' >> /usr/local/bin/start-v2ray.sh && \
+    echo 'export V2RAY_BUFFER_SIZE="${V2RAY_BUFFER_SIZE:-262144}"' >> /usr/local/bin/start-v2ray.sh && \
     echo 'export V2RAY_UUID="${V2RAY_UUID:-${V2RAY_UUID_FALLBACK:-}}"' >> /usr/local/bin/start-v2ray.sh && \
     echo 'if [ -z "${V2RAY_UUID:-}" ]; then' >> /usr/local/bin/start-v2ray.sh && \
     echo '    log "ERROR: V2RAY_UUID must be set"' >> /usr/local/bin/start-v2ray.sh && \

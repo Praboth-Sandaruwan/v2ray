@@ -1,6 +1,6 @@
 {
   "log": {
-    "loglevel": "${V2RAY_LOG_LEVEL}",
+    "loglevel": "$V2RAY_LOG_LEVEL",
     "access": "/var/log/v2ray/access.log",
     "error": "/var/log/v2ray/error.log"
   },
@@ -11,18 +11,18 @@
       "8.8.8.8",
       "8.8.4.4"
     ],
-    "queryStrategy": "${DNS_QUERY_STRATEGY:-UseIPv4}",
-    "disableCache": false
+    "queryStrategy": "$DNS_QUERY_STRATEGY",
+    "disableCache": $DNS_DISABLE_CACHE
   },
   "inbounds": [
     {
       "listen": "0.0.0.0",
-      "port": 11000,
+      "port": $V2RAY_PORT,
       "protocol": "vless",
       "settings": {
         "clients": [
           {
-            "id": "2e50bce3-2c41-4d46-9a25-7b4d478c855a",
+            "id": "$V2RAY_UUID",
             "level": 0,
             "email": "user@example.com"
           }
@@ -32,9 +32,9 @@
       "streamSettings": {
         "network": "ws",
         "wsSettings": {
-            "path": "/beelzebub",
+          "path": "$V2RAY_PATH",
           "headers": {
-            "Host": "127.0.0.1"
+            "Host": "$V2RAY_SERVER"
           }
         },
         "security": "none",
@@ -103,7 +103,7 @@
         "downlinkOnly": 5,
         "statsUserUplink": true,
         "statsUserDownlink": true,
-        "bufferSize": 65536
+        "bufferSize": $V2RAY_BUFFER_SIZE
       }
     },
     "system": {
